@@ -1,0 +1,18 @@
+A                          |  85 |   Slow | no timer
+B                          | 239 |   Fast | no timer
+C                          | 240 | Medium | no timer
+D                          | 241 | Medium | no timer
+E                          | 254 |   Slow | no timer
+F                          | 255 |   Fast | no timer
+G                          | 257 |   Slow | no timer
+H                          | 333 |   Slow | no timer
+I                          | 482 |   Slow | no timer
+J                          | 100 |   Fast | 72:00:00 | AtBeginning      | StopCooking
+K                          | 100 |   Fast | 72:00:00 | AtSetTemperature | StopCooking
+L                          | 100 |   Fast |  0:00:05 | AtBeginning      | StopCooking
+M                          | 100 |   Fast |  0:01:00 | AtPrompt         | StopCooking
+N                          | 100 |   Slow |  1:02:00 | AtSetTemperature | KeepWarm
+O                          | 100 |   Slow |  1:02:00 | AtSetTemperature | RepeatTimer
+P                          | 100 |   Slow | 23:59:00 | AtSetTemperature | RepeatTimer
+Q                          | 100 |   Slow | 71:59:00 | AtSetTemperature | RepeatTimer
+R                          | 100 |   Slow | 71:59:00 | AtSetTemperature | ContinueCooking

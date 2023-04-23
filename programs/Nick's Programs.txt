@@ -1,0 +1,46 @@
+Beef Post Sous Vide (Sear) | 450 |   Fast |  0:02:00 | AtSetTemperature | RepeatTimer
+Burger Cook Med Rare       | 385 | Medium |  0:02:55 | AtSetTemperature | RepeatTimer
+Burger Cook Medium         | 385 |   Fast |  0:03:20 | AtSetTemperature | RepeatTimer
+Burger Sear                | 425 |   Fast |  0:01:00 | AtSetTemperature | RepeatTimer
+Butter (Browned)           | 266 |   Slow | no timer
+Butter (Clarified)         | 240 |   Slow |  0:20:00 | AtSetTemperature | KeepWarm
+Carrots (Caramelize)       | 300 | Medium | no timer
+Carrots (Sauted)           | 266 | Medium | no timer
+Chicken Cubed/Small Piece  | 425 |   Fast | no timer
+Chocolate Dark (Melt)      | 131 |   Slow | no timer
+Chocolate Dark (Temper)    |  90 |   Slow | no timer
+Chocolate Milk (Melt)      | 122 |   Slow | no timer
+Chocolate Milk (Temper)    |  88 |   Slow | no timer
+Chocolate White (Melt)     | 113 |   Slow | no timer
+Chocolate White (Temper)   |  86 |   Slow | no timer
+Cranberry Sauce            | 220 | Medium | no timer
+Crème Anglaise             | 175 |   Slow | no timer
+Crêpes                     | 285 |   Fast | no timer
+Curry Paste (Fry)          | 350 | Medium | no timer
+Donuts (Deep fried)        | 350 |   Fast | no timer
+Egg (Poached)              | 183 | Medium |  0:05:00 | AtSetTemperature | StopCooking
+Eggs (Fried, side 1)       | 248 |   Fast |  0:05:00 | AtPrompt         | ContinueCooking
+Eggs (Fried, side 2)       | 248 |   Fast |  0:02:00 | Immediately      | StopCooking
+Eggs (Pasteurized)         | 131 |   Fast |  2:00:00 | AtSetTemperature | StopCooking
+Eggs (slow scrambled)      | 175 |   Slow | no timer
+French Fries               | 350 |   Fast | no timer
+French Omelette            | 228 |   Slow |  0:02:00 | AtSetTemperature | ContinueCooking
+Garlic (Sauted)            | 266 | Medium | no timer
+Garlic (Sweated)           | 230 | Medium | no timer
+Grilled Cheese Sandwich    | 375 |   Fast | no timer
+Hollandaise Sauce          | 167 | Medium | no timer
+Marmalade                  | 222 |   Fast |  0:02:00 | AtSetTemperature | KeepWarm
+Nuts (Toasted)             | 248 | Medium | no timer
+Onions (Caramelized)       | 275 | Medium | no timer
+Pancakes                   | 332 |   Fast |  0:02:00 | AtSetTemperature | RepeatTimer
+Potatoes (Deep Fried)      | 374 |   Fast | no timer
+Scallops                   | 450 | Medium | no timer
+Shrimp (Stir Fry)          | 425 |   Fast | no timer
+Spices (Toasted)           | 252 | Medium | no timer
+Steak Cook                 | 375 |   Fast |  0:00:30 | AtSetTemperature | RepeatTimer
+Steak Sear                 | 425 |   Fast |  0:02:00 | AtSetTemperature | RepeatTimer
+Tea Black                  | 212 |   Fast |  0:03:00 | AtSetTemperature | StopCooking
+Tea Green                  | 176 |   Fast |  0:02:00 | AtSetTemperature | StopCooking
+Tea Herbal                 | 203 |   Fast |  0:03:00 | AtSetTemperature | StopCooking
+Tea Oolong                 | 194 |   Fast |  0:02:00 | AtSetTemperature | StopCooking
+Tea White                  | 185 |   Fast |  0:02:00 | AtSetTemperature | StopCooking
