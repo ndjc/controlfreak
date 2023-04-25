@@ -9,30 +9,20 @@ import java.util.Arrays;
 
 
 /**
- * A 256 byte buffer for writing Breville Control Freak program files.
+ * A 8kb buffer for writing Breville Control Freak program files.
  * <p>
  * Control Freak program files consist of 8K bytes written out to a USB stick in 32 blocks of 256 bytes each.
- * Each 256 byte block contains 7 programs of 36 bytes each, plus a 4 byte filler.
+ * The first 4k (16 blocks) contains program entries; the second 4k contains alarm entries.
+ * Each 256 byte block contains 7 entries of 36 bytes each, plus a 4 byte filler.
  * The data is terminated at end of file, or with a block starting with 0xff.
  *
  * @author ndjc
  * Copyright (c) 2023 Nick Crossley.  Licensed under the MIT license - see LICENSE.txt.
  */
-public class CFOutBuffer implements AutoCloseable
+public class CFOutBuffer extends CFBuffer implements AutoCloseable
 {
-    /**
-     * The maximum number of programs in a single file.
-     */
-    public static final int  MAX_PROGRAMS  = 32 * 7;
-
-    private static final int BUFFER_LENGTH = 8192;
-    private static final int BLOCK_LENGTH  = 256;
-
     private OutputStream	output;
-    private byte[]			buffer = new byte[BUFFER_LENGTH];
-    private int				limit = BLOCK_LENGTH-4;
-    private int				offset = 0;
-    private final boolean	internal;
+    private boolean   	    internal;
 
 
     /**
@@ -44,7 +34,7 @@ public class CFOutBuffer implements AutoCloseable
     {
         output = Files.newOutputStream(Paths.get(outputFile));
         Arrays.fill(buffer, (byte) 0xff);
-        internal = false;
+        markReady();
     }
 
 
@@ -56,42 +46,56 @@ public class CFOutBuffer implements AutoCloseable
         output = new ByteArrayOutputStream();
         Arrays.fill(buffer, (byte) 0xff);
         internal = true;
+        markReady();
     }
 
 
-    private void writeBuffer() throws IOException
+    void writeBuffer() throws IOException
     {
         output.write(buffer);
-        offset = 0;
-        limit = BLOCK_LENGTH-4;
         Arrays.fill(buffer, (byte) 0xff);
     }
 
 
     /**
-     * Write a single program entry to the CFOutBuffer.
-     * @param entry the byte array into which the program entry is written
+     * Write a single entry (program or alarm) to the CFOutBuffer.
+     * @param entry the entry to be written
      * @throws IOException if the output cannot be written
      * @throws CFException if the entry is malformed
      */
-    public void writeEntry(byte[] entry) throws IOException, CFException
+    public void writeEntry(Entry entry) throws IOException, CFException
     {
-        if (offset + entry.length > limit)
+        BufferControls controls = entry.isProgramEntry() ? programControls : alarmControls;
+        byte[] entryBytes = entry.getBytes();
+        int length = entryBytes.length;
+
+        if (controls.getOffset() + length > controls.getLimit())
         {
-            offset += 4;
-            limit += BLOCK_LENGTH;
+            controls.incrementOffset(4);
+            controls.incrementLimit(BLOCK_LENGTH);
         }
-        if (offset + entry.length > limit)
+        if (controls.getOffset() + length > controls.getLimit())
         {
-            throw new CFException(String.format("Entry too long (%d)",entry.length));
+            throw new CFException(String.format("Entry too long (%d)",length));
         }
-        if (offset + entry.length > BUFFER_LENGTH)
+        if (controls.getOffset() + length > (entry.isProgramEntry() ? ALARM_OFFSET : BUFFER_LENGTH))
         {
             throw new CFException("Too many programs to fit in one file");
         }
 
-        System.arraycopy(entry, 0, buffer, offset, entry.length);
-        offset += entry.length;
+        System.arraycopy(entryBytes, 0, buffer, controls.getOffset(), length);
+        controls.incrementOffset(length);
+    }
+
+
+    @Override
+    public void close() throws IOException, CFException
+    {
+        if (programControls.getOffset() > 0 || alarmControls.getOffset() > 0)
+        {
+            writeBuffer();
+        }
+        output.close();
     }
 
 
@@ -106,15 +110,5 @@ public class CFOutBuffer implements AutoCloseable
             throw new CFException("cannot convert external CFOutBuffer to byte array");
         }
     }
-
-
-    @Override
-    public void close() throws IOException, CFException
-    {
-        if (offset > 0)
-        {
-            writeBuffer();
-        }
-        output.close();
-    }
 }
+

@@ -9,10 +9,25 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Represents a single program for the Breville Control Freak.
+ * <p>
+ * The binary representation of a program is as follows:
+ * Bytes 00-25 contain the null-terminated name.
+ * Bytes 26-29 are unused.
+ * Byte  30    corresponds to the temperature in Fahrenheit modulo 256
+ * Byte  31    control byte
+ * 			   bit 7: if set, add 255 to the temperature to (for temperatures from 256-482)
+ *             bits 5-6: action after timer: Continue, Stop, Keep Warm, Repeat
+ *             bit 4: unused
+ *             bits 2-3: power level (Low, Medium, High, Max)
+ *             bits 0-1: Timer start control (At Beginning, At Set Temperature, At Prompt)
+ * Byte 32     corresponds to the hour timer value (0-71, or 72 if both minutes and seconds are 0)
+ * Byte 33     corresponds to the minute timer value (0-59).
+ * Byte 34     corresponds to the second timer value (0-59).
+ * Byte 35     is a checksum of all previous bytes.
  *
  * Copyright (c) 2023 Nick Crossley.  Licensed under the MIT license - see LICENSE.txt.
 
- * @param name the program name (at most 20 bytes)
+ * @param name the program name (at most 26 ASCII bytes)
  * @param temperature in ºF
  * @param power the power level (speed)
  * @param timer the timer value, or 0 if no timer is set
@@ -29,32 +44,6 @@ record Program(
         AfterTimer afterTimer) implements Comparable<Program>
 {
     /**
-     * The maximum temperature supported by the Breville Control Freak.
-     */
-    public static final int TEMP_MIN     = 0;
-
-
-    /**
-     * The maximum temperature supported by the Breville Control Freak.
-     */
-    public static final int TEMP_MAX     = 482;
-
-
-    /**
-     * The longest cooking time supported by the Breville Control Freak.
-     */
-    public static final int MAX_HOURS    = 72;
-
-
-    // Constants exposed to test code
-    static final int TEMP_MOD = 255;
-
-    // Internal implementation constants
-    private static final int ENTRY_LENGTH = 36;
-    private static final int NAME_LENGTH  = 26;
-
-
-    /**
      * Construct a new immutable Program.
      *
      * @param name the program name
@@ -67,11 +56,15 @@ record Program(
     Program(String name, int temperature, PowerLevel power, Timer timer, TimerStart timerStart,
             AfterTimer afterTimer)
     {
-        if (name.length() > NAME_LENGTH)
+        if (name.length() > CFConstants.PROGRAM_NAME_LENGTH)
         {
-            throw new IllegalArgumentException("program name too long");
+            throw new IllegalArgumentException(String.format("program name %s too long",name));
         }
-        if (temperature < TEMP_MIN || temperature > TEMP_MAX)
+        if (!name.matches("[A-Za-z 0-9(),./:-]+"))
+        {
+            throw new IllegalArgumentException(String.format("invalid characters in name %s",name));
+        }
+        if (temperature < CFConstants.TEMP_MIN || temperature > CFConstants.TEMP_MAX)
         {
             throw new IllegalArgumentException("temperature out of range");
         }
@@ -119,8 +112,8 @@ record Program(
     public String toString()
     {
         return String.format("%-26s | %3d | %6s | ", name, temperature, power)
-            + (timer.isOff() ? String.format("%-46s","no timer")
-                : String.format("%8s | %-16s | %-16s", timer, timerStart, afterTimer));
+            + (timer.isOff() ? String.format("%s","no timer")
+                : String.format("%8s | %-16s | %s", timer, timerStart, afterTimer));
     }
 
 
@@ -138,15 +131,14 @@ record Program(
             sc.useDelimiter("\\s*\\|\\s*|\\s*$");
             String theName = sc.next();
 
-            //int theTemperature = Integer.min(sc.nextInt(), TEMP_MAX);
             int theTemperature = sc.nextInt();
-            if (theTemperature < TEMP_MIN)
+            if (theTemperature < CFConstants.TEMP_MIN)
             {
-                throw new CFException(String.format("Temperature %d too low (min %d)", theTemperature,TEMP_MIN));
+                throw new CFException(String.format("Temperature %d too low (min %d)", theTemperature,CFConstants.TEMP_MIN));
             }
-            if (theTemperature > TEMP_MAX)
+            if (theTemperature > CFConstants.TEMP_MAX)
             {
-                throw new CFException(String.format("Temperature %d too high (max %d)", theTemperature,TEMP_MAX));
+                throw new CFException(String.format("Temperature %d too high (max %d)", theTemperature,CFConstants.TEMP_MAX));
             }
 
             PowerLevel thePower = PowerLevel.mkValue(sc.next());
@@ -167,51 +159,41 @@ record Program(
      */
     public static Program readProgram(CFInBuffer buffer) throws CFException, IOException
     {
-        byte[] entry = new byte[ENTRY_LENGTH];
-        int len = buffer.readEntry(entry);
-        if (len < 0 || entry[0] == -1) return null;
+        Entry entry = buffer.readEntry(EntryType.ProgramEntry);
+        if (entry == null) return null;
+        byte[] entryBytes = entry.getBytes();
 
-        if (len != ENTRY_LENGTH)
+        int len = entryBytes.length;
+        if (len != CFConstants.ENTRY_LENGTH)
         {
-            throw new CFException(String.format("Program entry was %d bytes long, should have been %d", len, ENTRY_LENGTH));
+            throw new CFException(String.format("Program entry was %d bytes long, should have been %d", len, CFConstants.ENTRY_LENGTH));
         }
 
-        int nameEnd = indexOfByte(0,entry,0,NAME_LENGTH);
+        int nameEnd = indexOfByte(0,entryBytes,0,CFConstants.PROGRAM_NAME_LENGTH);
         if (nameEnd == 0)
         {
-            throw new CFException(String.format("Program name blank in entry %s",HexFormat.of().withUpperCase().formatHex(entry)));
+            throw new CFException(String.format("Program name blank in entry %s",HexFormat.of().withUpperCase().formatHex(entryBytes)));
         }
 
         if (nameEnd < 0)
         {
             nameEnd = 26;
         }
-        String programName = new String(entry, 0, nameEnd, StandardCharsets.US_ASCII);
+        String programName = new String(entryBytes, 0, nameEnd, StandardCharsets.US_ASCII);
 
-        int temp = entry[30] & 0xff;
-        int control = entry[31] & 0xff;
-        if ((control & 0x80) != 0) temp += TEMP_MOD;
-        temp = Integer.min(temp,TEMP_MAX);
+        int temp = entryBytes[30] & 0xff;
+        int control = entryBytes[31] & 0xff;
+        if ((control & 0x80) != 0) temp += CFConstants.TEMP_MOD;
+        temp = Integer.min(temp,CFConstants.TEMP_MAX);
 
         AfterTimer afterTimer = AfterTimer.mkValue((control >> 5) & 0x03);
         PowerLevel powerLevel = PowerLevel.mkValue((control >> 2) & 0x03);
         TimerStart timerStart = TimerStart.mkValue(control & 0x03);
 
-        int hours = entry[32] & 0xff;
-        int minutes = entry[33] & 0xff;
-        int seconds = entry[34] & 0xff;
+        int hours = entryBytes[32] & 0xff;
+        int minutes = entryBytes[33] & 0xff;
+        int seconds = entryBytes[34] & 0xff;
         Timer timer = new Timer(hours, minutes, seconds);
-
-        int checkSum = 0;
-        for (int i=0; i < ENTRY_LENGTH-1; i++)
-        {
-            checkSum += entry[i] & 0xff;
-        }
-        checkSum &= 0xff;
-        if (checkSum != (entry[35] & 0xff))
-        {
-            throw new CFException(String.format("Checksum does not match (%02x != %02x)",checkSum,entry[35]));
-        }
 
         return new Program(programName,temp,powerLevel, timer, timerStart, afterTimer);
     }
@@ -225,55 +207,59 @@ record Program(
      */
     public void writeProgram(CFOutBuffer out) throws IOException, CFException
     {
-        byte[] entry = new byte[ENTRY_LENGTH];
+        byte[] entryBytes = new byte[CFConstants.ENTRY_LENGTH];
 
         // Write program name to buffer
-        byte[] nameBytes = name.getBytes(StandardCharsets.UTF_8);
+        byte[] nameBytes = name.getBytes(StandardCharsets.US_ASCII);
         int nlen = nameBytes.length;
-        if (nlen > NAME_LENGTH)
+        if (nlen > CFConstants.PROGRAM_NAME_LENGTH)
         {
-            throw new CFException(String.format("Program name %s too long (max %d)", name,NAME_LENGTH));
+            throw new CFException(String.format("Program name %s too long (max %d)", name,CFConstants.PROGRAM_NAME_LENGTH));
         }
-        for (int i=0; i<=NAME_LENGTH; i++)
+        for (int i=0; i<=CFConstants.PROGRAM_NAME_LENGTH; i++)
         {
-            entry[i] = (i < nlen ? nameBytes[i] : 0);
+            entryBytes[i] = (i < nlen ? nameBytes[i] : 0);
         }
 
         // Write temperature to buffer
-        if (temperature > TEMP_MOD)
+        if (temperature > CFConstants.TEMP_MOD)
         {
-            entry[30] = (byte) (temperature - TEMP_MOD);
-            entry[31] = (byte) 0x80;
+            entryBytes[30] = (byte) (temperature - CFConstants.TEMP_MOD);
+            entryBytes[31] = (byte) 0x80;
         }
         else
         {
-            entry[30] = (byte)(temperature & 0xff);
+            entryBytes[30] = (byte)(temperature & 0xff);
         }
 
         // Write control values to buffer
-        entry[31] |= afterTimer.getValue() << 5;
-        entry[31] |= power.getValue() << 2;
-        entry[31] |= timerStart.getValue();
+        entryBytes[31] |= afterTimer.getValue() << 5;
+        entryBytes[31] |= power.getValue() << 2;
+        entryBytes[31] |= timerStart.getValue();
 
         // Write timer to buffer
-        entry[32] = (byte)(timer.hours());
-        entry[33] = (byte)(timer.minutes());
-        entry[34] = (byte)(timer.seconds());
+        entryBytes[32] = (byte)(timer.hours());
+        entryBytes[33] = (byte)(timer.minutes());
+        entryBytes[34] = (byte)(timer.seconds());
 
         // Write checksum to buffer
-        int checkSum = 0;
-        for (int i=0; i < ENTRY_LENGTH-1; i++)
-        {
-            checkSum += entry[i] & 0xff;
-        }
-        entry[35] = (byte)(checkSum & 0xff);
+        entryBytes[35] = Entry.checksum(entryBytes);
 
         // Write buffer to output
+        Entry entry = new Entry(EntryType.ProgramEntry,entryBytes);
         out.writeEntry(entry);
     }
 
 
-    private static int indexOfByte(int item, byte[] arr, int start, int len)
+    /**
+     * Find a byte value in an array of bytes.
+     * @param item the byte to be found
+     * @param arr the array to search
+     * @param start where to start the search
+     * @param len how many bytes to search
+     * @return the offset of the found byte, or -1 if not found
+     */
+    public static int indexOfByte(int item, byte[] arr, int start, int len)
     {
         for (int offset = start; offset < arr.length && offset < start+len; offset++)
         {

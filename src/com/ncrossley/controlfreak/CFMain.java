@@ -6,31 +6,20 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 
 /**
  * Main program to decode/encode/merge Breville Control Freak files.
- * Bytes 00-19 contain the null-terminated name.
- * Bytes 20-29 are unused.
- * Byte  30    corresponds to the temperature in Fahrenheit modulo 256
- * Byte  31    control byte
- * 			   bit 7: if set, add 255 to the temperature to (for temperatures from 256-482)
- *             bits 5-6: action after timer: Continue, Stop, Keep Warm, Repeat
- *             bit 4: unused
- *             bits 2-3: power level (Low, Medium, High, Max)
- *             bits 0-1: Timer start control (At Beginning, At Set Temperature, At Prompt)
- * Byte 32     corresponds to the hour timer value (0-71, or 72 if both minutes and seconds are 0)
- * Byte 33     corresponds to the minute timer value (0-59).
- * Byte 34     corresponds to the second timer value (0-59).
- * Byte 35     is a checksum of all previous bytes.
  *
  * Copyright (c) 2023 Nick Crossley.  Licensed under the MIT license - see LICENSE.txt.
  */
 public final class CFMain
 {
     private Set<Program> programs;
+    private Set<Alarm>   alarms;
     private String       outfile;
     private String       textfile;
     private boolean      sort = true;
@@ -39,19 +28,21 @@ public final class CFMain
     private CFMain()
     {
         programs = new LinkedHashSet<>();
+        alarms = new LinkedHashSet<>();
     }
 
 
     /**
-     * Reads Breville Control Freak programs, either from FA1 files or from a text representation.
+     * Reads Breville Control Freak programs and alarms, either from FA1 files or from a text representation.
      * Merges all such programs into alphabetical order of program name, eliminating duplicates.
      * Writes out a textual representation of the sorted list,
-     * and optionally writes an FA1 file and/or a text file containg the textual representation.
+     * and optionally writes an FA1 file and/or a text file containing the textual representation.
      *
      * The text representation accepted for input is the same as presented on output - that is,
-     * a sequence of lines, one program per line, with one of the two following formats:
+     * a sequence of lines, one program or alarm per line, with one of the three following formats:
      * program name | temperature in ºF | power level | hh:mm:ss | start control | after timer
      * program name | temperature in ºF | power level | 'off' or 'no timer'
+     * alarm name | temperature in ºF
      *
      * Power level is Low, Medium or High
      * Start control is At Beginning, At Set Temperature, or At Prompt
@@ -120,6 +111,15 @@ public final class CFMain
                             System.err.printf("Skipping duplicate program %s%n",program);
                         }
                     }
+
+                    Alarm alarm;
+                    while ((alarm = Alarm.readAlarm(buffer)) != null)
+                    {
+                        if (!alarms.add(alarm))
+                        {
+                            System.err.printf("Skipping duplicate alarm %s%n",alarm);
+                        }
+                    }
                 }
             }
             else
@@ -128,12 +128,32 @@ public final class CFMain
 
                 List<String> allLines = Files.readAllLines(Paths.get(arg));
 
+                Pattern p = Pattern.compile(".*\\|.*\\|.*");
                 for (String line : allLines)
                 {
-                    Program program = Program.mkProgram(line);
-                    if (!programs.add(program))
+                    String trimmedLine = line.trim();
+
+                    if (trimmedLine.isEmpty())
                     {
-                        System.err.printf("Skipping duplicate program %s%n",program);
+                        // Skip blank lines
+                    }
+                    else if (p.matcher(trimmedLine).matches())
+                    {
+                        // A line with at least two vertical bars must be a program
+                        Program program = Program.mkProgram(line);
+                        if (!programs.add(program))
+                        {
+                            System.err.printf("Skipping duplicate program %s%n",program);
+                        }
+                    }
+                    else
+                    {
+                        // Otherwise, try an alarm
+                        Alarm alarm = Alarm.mkAlarm(trimmedLine);
+                        if (!alarms.add(alarm))
+                        {
+                            System.err.printf("Skipping duplicate alarm %s%n",alarm);
+                        }
                     }
                 }
             }
@@ -144,33 +164,47 @@ public final class CFMain
         if (sort)
         {
             programs = new TreeSet<>(programs);
+            alarms = new TreeSet<>(alarms);
         }
 
-        printPrograms();
-        writePrograms();
+        printAll();
+        writeAll();
     }
 
 
     /**
-     * Print a human-readable textual representation of the programs.
+     * Print a human-readable textual representation of the programs and alarms.
      * @throws FileNotFoundException if the output file cannot be created
      */
-    private void printPrograms() throws FileNotFoundException
+    private void printAll() throws FileNotFoundException
     {
-        for (Program program : programs)
-        {
-            System.out.println(program);
-        }
+        printer(System.out);
 
         if (textfile != null)
         {
             try (PrintStream ps = new PrintStream(textfile))
             {
-                for (Program program : programs)
-                {
-                    ps.println(program);
-                }
+                printer(ps);
             }
+        }
+    }
+
+
+    private void printer(PrintStream printStream)
+    {
+        for (Program program : programs)
+        {
+            printStream.println(program);
+        }
+
+        if (!programs.isEmpty() && !alarms.isEmpty())
+        {
+            printStream.println();
+        }
+
+        for (Alarm alarm : alarms)
+        {
+            printStream.println(alarm);
         }
     }
 
@@ -181,7 +215,7 @@ public final class CFMain
      * @throws CFException if the programs cannot be converted to binary,
      * or if there are too many programs
      */
-    private void writePrograms() throws IOException, CFException
+    private void writeAll() throws IOException, CFException
     {
         if (outfile != null)
         {
@@ -190,6 +224,10 @@ public final class CFMain
                 for (Program program : programs)
                 {
                     program.writeProgram(out);
+                }
+                for (Alarm alarm : alarms)
+                {
+                    alarm.writeAlarm(out);
                 }
             }
         }

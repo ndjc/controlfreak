@@ -27,15 +27,15 @@ public class ProgramTest
         tempTest(0);
         tempTest(1);
         tempTest(86);
-        tempTest(Program.TEMP_MOD-1);
-        tempTest(Program.TEMP_MOD);
-        tempTest(Program.TEMP_MOD+1);
+        tempTest(CFConstants.TEMP_MOD-1);
+        tempTest(CFConstants.TEMP_MOD);
+        tempTest(CFConstants.TEMP_MOD+1);
         tempTest(254);
         tempTest(255);
         tempTest(256);
         tempTest(257);
         tempTest(380);
-        tempTest(Program.TEMP_MAX);
+        tempTest(CFConstants.TEMP_MAX);
     }
 
 
@@ -57,7 +57,7 @@ public class ProgramTest
     public void testHighTemp()
     {
         Exception exception = assertThrows(
-            CFException.class, () -> tempTest(Program.TEMP_MAX+1));
+            CFException.class, () -> tempTest(CFConstants.TEMP_MAX+1));
 
         String expectedMessage = "too high";
         String actualMessage = exception.getMessage();
@@ -96,7 +96,7 @@ public class ProgramTest
                 {
                     try (CFOutBuffer buffer = new CFOutBuffer())
                     {
-                        for (int i=0; i<=CFOutBuffer.MAX_PROGRAMS; i++)
+                        for (int i=0; i<=CFConstants.MAX_ENTRIES; i++)
                         {
                             Program p = Program.mkProgram(String.format("P%d | 100 | Fast | off", i));
                             p.writeProgram(buffer);
