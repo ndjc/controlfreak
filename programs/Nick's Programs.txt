@@ -1,5 +1,7 @@
 Beef Post Sous Vide (Sear) | 450 |   Fast |  0:02:00 | AtSetTemperature | RepeatTimer
-Blanch vegetables          | 248 |   Fast | no timer
+Blanch Vegetables          | 248 |   Fast | no timer
+Blister Vegetables         | 450 |   Fast | no timer
+Boil Cream                 | 207 |   Slow | no timer
 Braise                     | 206 | Medium | no timer
 Browning Chicken           | 392 |   Fast | no timer
 Browning Pork              | 428 |   Fast | no timer
@@ -10,7 +12,7 @@ Burger Cook Medium         | 385 |   Fast |  0:03:20 | AtSetTemperature | Repeat
 Burger Sear                | 425 |   Fast |  0:01:00 | AtSetTemperature | RepeatTimer
 Butter (Browned)           | 266 |   Slow | no timer
 Butter (Clarified)         | 240 |   Slow |  0:20:00 | AtSetTemperature | StopCooking
-Carrots (Caramelize)       | 300 | Medium | no timer
+Carrots (Caramelize)       | 302 | Medium | no timer
 Carrots (Sauted)           | 266 | Medium | no timer
 Chicken Cubed/Small Piece  | 425 |   Fast | no timer
 Chocolate Dark (Melt)      | 131 |   Slow | no timer
@@ -19,6 +21,8 @@ Chocolate Milk (Melt)      | 122 |   Slow | no timer
 Chocolate Milk (Temper)    |  88 |   Slow | no timer
 Chocolate White (Melt)     | 113 |   Slow | no timer
 Chocolate White (Temper)   |  86 |   Slow | no timer
+Confit Duck                | 180 | Medium | no timer
+Confit Salmon              | 140 | Medium | no timer
 Cranberry Sauce            | 220 | Medium | no timer
 Creme Anglaise             | 175 |   Slow | no timer
 Crepes                     | 285 |   Fast | no timer
@@ -29,7 +33,8 @@ Egg (Poached)              | 183 | Medium |  0:05:00 | AtSetTemperature | StopCo
 Eggs (Fried, side 1)       | 248 |   Fast |  0:05:00 | AtPrompt         | ContinueCooking
 Eggs (Fried, side 2)       | 248 |   Fast |  0:02:00 | AtBeginning      | StopCooking
 Eggs (Pasteurized)         | 131 |   Fast |  2:00:00 | AtSetTemperature | StopCooking
-Eggs (slow scrambled)      | 175 |   Slow | no timer
+Eggs (Scrambled Fast)      | 325 | Medium | no timer
+Eggs (Scrambled Slow)      | 175 |   Slow | no timer
 French Fries               | 350 |   Fast | no timer
 French Omelette            | 228 |   Slow |  0:02:00 | AtSetTemperature | ContinueCooking
 Garlic (Sauted)            | 266 | Medium | no timer
@@ -38,18 +43,25 @@ Ghee stage 1 (melt)        | 195 |   Slow | no timer
 Ghee stage 2 (evaporate)   | 230 | Medium | no timer
 Ghee stage 3 (cook)        | 262 |   Slow | no timer
 Grilled Cheese Sandwich    | 375 |   Fast | no timer
+Hash Browns                | 375 |   Fast | no timer
 Hollandaise Sauce          | 167 | Medium | no timer
+Lemon Curd                 | 177 | Medium | no timer
 Marmalade                  | 222 |   Fast |  0:02:00 | AtSetTemperature | KeepWarm
 Nuts (Toasted)             | 248 | Medium | no timer
 Onions (Caramelized)       | 275 | Medium | no timer
+Pan Fry                    | 375 |   Fast | no timer
 Pancakes                   | 332 |   Fast |  0:02:00 | AtSetTemperature | RepeatTimer
+Pasteurize Eggs            | 131 | Medium |  2:00:00 | AtSetTemperature | StopCooking
 Potatoes (Deep Fried)      | 374 |   Fast | no timer
-Reheat (soups,stews,etc.)  | 160 |   Slow | no timer
+Reheat (Soups,Stews,etc.)  | 160 |   Slow | no timer
+Render Pancetta            | 300 |   Fast | no timer
+Roast                      | 400 |   Fast | no timer
+Saute                      | 350 |   Fast | no timer
 Scallops                   | 450 | Medium | no timer
-Shrimp (Stir Fry)          | 425 |   Fast | no timer
 Spices (Toasted)           | 252 | Medium | no timer
 Steak Cook                 | 375 |   Fast |  0:00:30 | AtSetTemperature | RepeatTimer
 Steak Sear                 | 425 |   Fast |  0:02:00 | AtSetTemperature | RepeatTimer
+Stir Fry                   | 425 |   Fast | no timer
 Sugar - Dark Caramel       | 340 |   Fast | no timer
 Sugar - Firmball           | 248 |   Fast | no timer
 Sugar - Hard Crack         | 305 |   Fast | no timer
@@ -58,6 +70,7 @@ Sugar - Light Caramel      | 328 |   Fast | no timer
 Sugar - Soft Crack         | 280 |   Fast | no timer
 Sugar - Softball           | 238 |   Fast | no timer
 Sugar - Thread             | 232 |   Fast | no timer
+Sweat Vegetables           | 300 |   Fast | no timer
 Tea Black                  | 212 |   Fast |  0:03:00 | AtSetTemperature | KeepWarm
 Tea Green                  | 176 |   Fast |  0:02:00 | AtSetTemperature | KeepWarm
 Tea Herbal                 | 203 |   Fast |  0:03:00 | AtSetTemperature | KeepWarm
