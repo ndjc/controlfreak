@@ -26,6 +26,7 @@ Confit Salmon              | 140 | Medium | no timer
 Cranberry Sauce            | 220 | Medium | no timer
 Creme Anglaise             | 175 |   Slow | no timer
 Crepes                     | 285 |   Fast | no timer
+Crispy Skin Fish           | 450 |   Fast | no timer
 Curry Paste (Fry)          | 350 | Medium | no timer
 Custard, Ice Cream         | 182 |   Slow | no timer
 Donuts (Deep fried)        | 350 |   Fast | no timer
@@ -58,7 +59,8 @@ Render Pancetta            | 300 |   Fast | no timer
 Roast                      | 400 |   Fast | no timer
 Saute                      | 350 |   Fast | no timer
 Scallops                   | 450 | Medium | no timer
-Spices (Toasted)           | 252 | Medium | no timer
+Shallow Fry                | 345 |   Fast | no timer
+Spices (Toasted)           | 260 | Medium | no timer
 Steak Cook                 | 375 |   Fast |  0:00:30 | AtSetTemperature | RepeatTimer
 Steak Sear                 | 425 |   Fast |  0:02:00 | AtSetTemperature | RepeatTimer
 Stir Fry                   | 425 |   Fast | no timer
