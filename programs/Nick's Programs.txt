@@ -4,8 +4,7 @@ Blister Vegetables         | 450 |   Fast | no timer
 Boil Cream                 | 207 |   Slow | no timer
 Braise                     | 206 | Medium | no timer
 Browning Chicken           | 392 |   Fast | no timer
-Browning Pork              | 428 |   Fast | no timer
-Browning Red Meat          | 428 |   Fast | no timer
+Browning Pork and Red Meat | 428 |   Fast | no timer
 Browning Vegetables        | 392 |   Fast | no timer
 Burger Cook Med Rare       | 385 | Medium |  0:02:55 | AtSetTemperature | RepeatTimer
 Burger Cook Medium         | 385 |   Fast |  0:03:20 | AtSetTemperature | RepeatTimer

@@ -18,6 +18,8 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  */
 public final class CFMain
 {
+    private static final int MAX_PROGRAMS = 80;
+
     private Set<Program> programs;
     private Set<Alarm>   alarms;
     private String       outfile;
@@ -168,7 +170,18 @@ public final class CFMain
         }
 
         printAll();
-        writeAll();
+        if (programs.size() > MAX_PROGRAMS)
+        {
+            System.err.printf("Too many programs: you have %d, but the device can only take %d%n", programs.size(), MAX_PROGRAMS);
+            if (outfile != null)
+            {
+                System.err.println("No binary file has been written");
+            }
+        }
+        else
+        {
+            writeAll();
+        }
     }
 
 

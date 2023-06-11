@@ -16,6 +16,9 @@ import java.util.Arrays;
  * Each 256 byte block contains 7 entries of 36 bytes each, plus a 4 byte filler.
  * The data is terminated at end of file, or with a block starting with 0xff.
  *
+ * The above description allows for a total of 16 x 7 = 112 programs or alarms,
+ * but my Control Freak limits the number of programs to 80.
+ *
  * @author ndjc
  * Copyright (c) 2023 Nick Crossley.  Licensed under the MIT license - see LICENSE.txt.
  */
