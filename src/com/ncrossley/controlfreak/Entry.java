@@ -7,7 +7,7 @@ package com.ncrossley.controlfreak;
  * @author ndjc
  * Copyright (c) 2023 Nick Crossley.  Licensed under the MIT license - see LICENSE.txt.
  */
-public class Entry
+public final class Entry
 {
     /** The length of an entry - program or alarm. */
     public static final int ENTRY_LENGTH = 36;

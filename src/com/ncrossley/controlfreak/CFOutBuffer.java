@@ -22,7 +22,7 @@ import java.util.Arrays;
  * @author ndjc
  * Copyright (c) 2023 Nick Crossley.  Licensed under the MIT license - see LICENSE.txt.
  */
-public class CFOutBuffer extends CFBuffer implements AutoCloseable
+public final class CFOutBuffer extends CFBuffer implements AutoCloseable
 {
     private OutputStream	output;
     private boolean   	    internal;
@@ -63,10 +63,9 @@ public class CFOutBuffer extends CFBuffer implements AutoCloseable
     /**
      * Write a single entry (program or alarm) to the CFOutBuffer.
      * @param entry the entry to be written
-     * @throws IOException if the output cannot be written
      * @throws CFException if the entry is malformed
      */
-    public void writeEntry(Entry entry) throws IOException, CFException
+    public void writeEntry(Entry entry) throws CFException
     {
         BufferControls controls = entry.isProgramEntry() ? programControls : alarmControls;
         byte[] entryBytes = entry.getBytes();
@@ -92,7 +91,7 @@ public class CFOutBuffer extends CFBuffer implements AutoCloseable
 
 
     @Override
-    public void close() throws IOException, CFException
+    public void close() throws IOException
     {
         if (programControls.getOffset() > 0 || alarmControls.getOffset() > 0)
         {

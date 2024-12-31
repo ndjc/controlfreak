@@ -19,7 +19,7 @@ import java.util.Arrays;
  * @author ndjc
  * Copyright (c) 2023 Nick Crossley.  Licensed under the MIT license - see LICENSE.txt.
  */
-public class CFInBuffer extends CFBuffer implements AutoCloseable
+public final class CFInBuffer extends CFBuffer implements AutoCloseable
 {
     private InputStream	input;
 
@@ -29,7 +29,7 @@ public class CFInBuffer extends CFBuffer implements AutoCloseable
      * @param inputFile the file from which this CFInBuffer will read
      * @throws IOException if the file cannot be read
      */
-    public CFInBuffer(String inputFile) throws IOException
+    public  CFInBuffer(String inputFile) throws IOException
     {
         input = Files.newInputStream(Paths.get(inputFile));
         markEmpty();
