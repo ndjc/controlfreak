@@ -202,10 +202,9 @@ record Program(
     /**
      * Write the hex representation of a program to a given buffer.
      * @param out the buffer to which the hex representation is written
-     * @throws IOException if the output cannot be written
      * @throws CFException if the program is malformed
      */
-    public void writeProgram(CFOutBuffer out) throws IOException, CFException
+    public void writeProgram(CFOutBuffer out) throws CFException
     {
         byte[] entryBytes = new byte[CFConstants.ENTRY_LENGTH];
 
